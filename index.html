@@ -335,13 +335,10 @@
   }
 
   function resetForm(){
-    document.getElementById("salePrice").value = FALLBACK.salePrice;
-    document.getElementById("deposit").value = FALLBACK.deposit;
-    document.getElementById("credit").value = FALLBACK.credit;
-    document.getElementById("closingDate").value = FALLBACK.closingDate;
-    document.getElementById("hoa").value = FALLBACK.hoa;
-    document.getElementById("brokerRebate").value = FALLBACK.brokerRebate;
-    document.getElementById("taxBill").value = FALLBACK.taxBill;
+    ["salePrice","deposit","credit","closingDate","hoa","brokerRebate","taxBill"].forEach(function(id){
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("salePrice").focus();
     recalc();
   }
 
