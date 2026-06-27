@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cash to Close Worksheet</title>
+<style>
+  :root{
+    --navy:#1F3864;
+    --navy2:#2E4D7B;
+    --band:#D9E1F2;
+    --gray:#F2F2F2;
+    --input:#FFFCE0;
+    --input-border:#E2B500;
+    --ink:#1b2333;
+    --muted:#5b6675;
+    --line:#d6dbe4;
+    --paper:#ffffff;
+    --bg:#eef1f6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Arial, Helvetica, "Segoe UI", sans-serif;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:880px;margin:0 auto;}
+
+  /* Toolbar (screen only) */
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;margin-bottom:18px;
+  }
+  .toolbar p{margin:0;color:var(--muted);font-size:13px;max-width:520px;}
+  .btns{display:flex;gap:10px;}
+  button{
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:8px;padding:10px 18px;border:1px solid var(--navy);
+    transition:transform .05s ease, background .15s ease, box-shadow .15s ease;
+  }
+  button:active{transform:translateY(1px);}
+  .btn-print{background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(31,56,100,.25);}
+  .btn-print:hover{background:var(--navy2);}
+  .btn-reset{background:#fff;color:var(--navy);}
+  .btn-reset:hover{background:#f4f6fb;}
+  button:focus-visible{outline:3px solid #9db8ec;outline-offset:2px;}
+
+  /* Input card (screen only) */
+  .input-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 6px 22px rgba(20,34,64,.08);overflow:hidden;margin-bottom:24px;
+  }
+  .input-head{
+    background:var(--navy);color:#fff;padding:13px 22px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .input-head h2{margin:0;font-size:15px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;}
+  .swatch{width:15px;height:15px;border-radius:3px;background:var(--input);border:1px solid var(--input-border);}
+  .input-head .hint{font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;color:#cdd7ea;}
+  .input-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:16px 26px;padding:22px;
+  }
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+  .field .sub{font-weight:400;color:var(--muted);font-size:11.5px;}
+  .field input{
+    width:100%;font-family:inherit;font-size:15px;color:var(--ink);
+    background:var(--input);border:1px solid var(--input-border);border-radius:7px;
+    padding:9px 11px;
+  }
+  .field input:focus{outline:3px solid #f0d77a;outline-offset:1px;}
+  .field .note{font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;}
+
+  /* The worksheet (prints) */
+  .sheet{
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 6px 22px rgba(20,34,64,.08);
+  }
+  .sheet-title{background:var(--navy);color:#fff;text-align:center;padding:16px 20px 6px;}
+  .sheet-title h1{margin:0;font-size:21px;letter-spacing:.04em;font-weight:700;}
+  .sheet-sub{background:var(--navy2);color:#dde6f6;text-align:center;font-size:12px;
+    letter-spacing:.05em;padding:6px 20px 9px;}
+
+  .summary{display:flex;gap:0;border-bottom:1px solid var(--line);}
+  .summary div{flex:1;padding:11px 22px;font-size:13px;}
+  .summary div:first-child{border-right:1px solid var(--line);}
+  .summary .lbl{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;}
+  .summary .val{font-weight:700;font-size:15px;color:var(--navy);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    background:var(--navy);color:#fff;font-weight:700;font-size:11px;
+    text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;text-align:right;
+  }
+  thead th.desc{text-align:left;}
+  tbody td{padding:6px 12px;border-bottom:1px solid #edf0f5;text-align:right;
+    font-variant-numeric:tabular-nums;}
+  tbody td.desc{text-align:left;}
+  tbody tr.section td{
+    background:var(--band);font-weight:700;color:var(--navy);
+    text-transform:uppercase;font-size:11px;letter-spacing:.04em;padding:7px 12px;
+  }
+  tbody tr.indent td.desc{padding-left:26px;}
+  tbody tr.subtotal td{background:var(--gray);font-weight:700;border-top:1.5px solid #c9d2e2;border-bottom:1.5px solid #c9d2e2;}
+  tbody tr.line-total td{font-weight:700;}
+  tbody tr.totals td{background:var(--navy);color:#fff;font-weight:700;padding:9px 12px;}
+
+  .ctc{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--navy);color:#fff;padding:16px 22px;gap:16px;
+  }
+  .ctc .ctc-lbl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+  .ctc .ctc-val{font-size:26px;font-weight:800;letter-spacing:.01em;}
+
+  .foot{padding:10px 22px;font-size:10.5px;color:var(--muted);text-align:center;}
+
+  @media (max-width:640px){
+    .input-grid{grid-template-columns:1fr;}
+    .table-scroll{overflow-x:auto;}
+    table{min-width:560px;}
+    .ctc{flex-direction:column;align-items:flex-start;}
+    .ctc .ctc-val{font-size:22px;}
+  }
+
+  /* PRINT: only the worksheet, clean, color-accurate */
+  @media print{
+    @page{size:letter portrait;margin:0.5in;}
+    body{background:#fff;padding:0;}
+    .no-print{display:none !important;}
+    .wrap{max-width:none;margin:0;}
+    .sheet{box-shadow:none;border:1px solid #b9c2d4;border-radius:0;}
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    tbody td{padding:5px 12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Toolbar: screen only -->
+  <div class="toolbar no-print">
+    <p>Enter the deal details in the yellow fields. Totals update automatically. Use <strong>Print</strong> to produce the worksheet (or save it as a PDF).</p>
+    <div class="btns">
+      <button class="btn-reset" onclick="resetForm()">Reset</button>
+      <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <!-- Inputs: screen only -->
+  <div class="input-card no-print">
+    <div class="input-head">
+      <span class="swatch"></span>
+      <h2>Inputs</h2>
+      <span class="hint">enter values in the yellow fields</span>
+    </div>
+    <div class="input-grid">
+      <div class="field">
+        <label for="salePrice">Sales Price</label>
+        <input id="salePrice" type="number" inputmode="decimal" step="1000" value="655000">
+      </div>
+      <div class="field">
+        <label for="deposit">Deposit Amount</label>
+        <input id="deposit" type="number" inputmode="decimal" step="500" value="7500">
+      </div>
+      <div class="field">
+        <label for="credit">Closing Cost Credit <span class="sub">(seller)</span></label>
+        <input id="credit" type="number" inputmode="decimal" step="500" value="7000">
+        <div class="note">Applied as the lower of this amount or total title/escrow charges.</div>
+      </div>
+      <div class="field">
+        <label for="closingDate">Closing Date</label>
+        <input id="closingDate" type="date" value="2026-06-29">
+      </div>
+      <div class="field">
+        <label for="hoa">HOA Amount <span class="sub">(monthly)</span></label>
+        <input id="hoa" type="number" inputmode="decimal" step="10" value="280">
+      </div>
+      <div class="field">
+        <label for="brokerRebate">Broker Rebate</label>
+        <input id="brokerRebate" type="number" inputmode="decimal" step="100" value="0">
+        <div class="note">Reference only — not included in totals.</div>
+      </div>
+      <div class="field">
+        <label for="taxBill">Tax Bill Amount</label>
+        <input id="taxBill" type="number" inputmode="decimal" step="10" value="1048.25">
+        <div class="note">Reference only — not included in totals.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worksheet: prints -->
+  <div class="sheet">
+    <div class="sheet-title"><h1>Cash to Close Worksheet</h1></div>
+    <div class="sheet-sub">ESTIMATE — PRELIMINARY BUYER CASH-TO-CLOSE SUMMARY</div>
+
+    <div class="summary">
+      <div><span class="lbl">Closing Date</span><span class="val" id="sumDate">—</span></div>
+      <div><span class="lbl">Estimated Sale Price</span><span class="val" id="sumSale">—</span></div>
+    </div>
+
+    <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Seller Debit</th>
+          <th>Seller Credit</th>
+          <th class="desc">Description</th>
+          <th>Buyer Debit</th>
+          <th>Buyer Credit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td></td><td id="saleCredit"></td><td class="desc">Sale Price of Property</td><td></td><td></td></tr>
+        <tr><td></td><td></td><td class="desc">Deposit</td><td></td><td id="depositCredit"></td></tr>
+        <tr><td></td><td></td><td class="desc">Seller Credit</td><td id="sellerCredit"></td><td></td></tr>
+        <tr><td id="excessDeposit"></td><td></td><td class="desc">Excess Deposit</td><td></td><td></td></tr>
+
+        <tr class="section"><td colspan="5">Prorations / Adjustments</td></tr>
+        <tr class="indent"><td></td><td id="builderSeller"></td><td class="desc">Builder Fee</td><td id="builderBuyer"></td><td></td></tr>
+        <tr class="indent"><td></td><td id="surveySeller"></td><td class="desc">Survey Fee</td><td id="surveyBuyer"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">County Taxes</td><td></td><td></td></tr>
+
+        <tr class="section"><td colspan="5">Title Charges &amp; Escrow Settlement Charges</td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Abstract / Search Fee</td><td id="abstract"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Electronic Recording Fee</td><td id="erecording"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Settlement Fee</td><td id="settlement"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Owner&rsquo;s Title Insurance</td><td id="titleIns"></td><td></td></tr>
+
+        <tr class="section"><td colspan="5">Government Recording &amp; Transfer Charges</td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Recording Fees</td><td id="recording"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">FL &ndash; Deed Stamps</td><td id="deedStamps"></td><td></td></tr>
+
+        <tr class="section"><td colspan="5">Miscellaneous</td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">HOA Dues &ndash; Closing Month</td><td id="hoaClosing"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Capital Contribution</td><td id="capital"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">HOA Dues &ndash; Following Month</td><td id="hoaFollowing"></td><td></td></tr>
+
+        <tr class="subtotal"><td id="subA"></td><td id="subB"></td><td class="desc">Subtotals</td><td id="subD"></td><td id="subE"></td></tr>
+        <tr class="line-total"><td></td><td></td><td class="desc">Due from Buyer</td><td></td><td id="dueFromBuyer"></td></tr>
+        <tr class="line-total"><td id="dueToSeller"></td><td></td><td class="desc">Due to Seller</td><td></td><td></td></tr>
+        <tr class="totals"><td id="totA"></td><td id="totB"></td><td class="desc">Totals</td><td id="totD"></td><td id="totE"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="ctc">
+      <span class="ctc-lbl">Estimated Cash to Close (Due from Buyer)</span>
+      <span class="ctc-val" id="cashToClose">—</span>
+    </div>
+
+    <div class="foot">This worksheet is an estimate only and is not a commitment to lend or a final settlement statement. Figures are subject to change.</div>
+  </div>
+
+</div>
+
+<script>
+  var FALLBACK = {salePrice:655000, deposit:7500, credit:7000, closingDate:"2026-06-29", hoa:280, brokerRebate:0, taxBill:1048.25};
+  // Constant line items (match the Excel)
+  var C = {builder:1000, survey:250, abstract:250, erecording:14, settlement:750, recording:10, capital:500, annualHOA:3240};
+
+  function num(id){ var v = parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; }
+  function usd(n){ return "$" + (Math.round(n*100)/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function set(id, n){ document.getElementById(id).textContent = usd(n); }
+
+  function titleInsurance(p){
+    if(p<=100000) return p*5.75/1000;
+    if(p<=1000000) return 575 + (p-100000)*5/1000;
+    if(p<=5000000) return 575 + 4500 + (p-1000000)*2.5/1000;
+    return 575 + 4500 + 10000 + (p-5000000)*2.25/1000;
+  }
+  function deedStamps(p){ return Math.ceil(p/100)*0.7; }
+
+  function recalc(){
+    var sp = num("salePrice");
+    var dep = num("deposit");
+    var cr  = num("credit");
+    var hoa = num("hoa");
+    var dStr = document.getElementById("closingDate").value;
+
+    // HOA closing-month proration (matches Excel: (annualHOA/12) * dayOfMonth / daysInMonth)
+    var hoaCM = 0, dateLabel = "—";
+    if(dStr){
+      var parts = dStr.split("-");
+      var y = +parts[0], m = +parts[1], d = +parts[2];
+      var daysInMonth = new Date(y, m, 0).getDate();
+      hoaCM = (C.annualHOA/12) * (d / daysInMonth);
+      var dd = new Date(y, m-1, d);
+      dateLabel = dd.toLocaleDateString("en-US",{month:"long", day:"numeric", year:"numeric"});
+    }
+
+    var ti = titleInsurance(sp);
+    var ds = deedStamps(sp);
+
+    // Buyer-debit line items D17:D27
+    var sumD17_27 = C.abstract + C.erecording + C.settlement + ti + C.recording + ds + hoaCM + C.capital + hoa;
+    var A11 = Math.min(cr, sumD17_27);                 // seller credit, capped
+    var sumD13_27 = C.builder + C.survey + sumD17_27;
+    var D28 = sumD13_27 + sp;                           // total buyer debit (SUM(D13:D27)-D10+B8, D10=0)
+    var E28 = dep;
+    var E29 = D28 - E28 - A11;                          // cash to close
+    var B28 = sp + C.builder + C.survey;               // total seller credit
+    var A28 = A11;
+    var A30 = B28 - A28;
+
+    // Summary
+    document.getElementById("sumDate").textContent = dateLabel;
+    document.getElementById("sumSale").textContent = usd(sp);
+
+    // Ledger
+    set("saleCredit", sp);
+    set("depositCredit", dep);
+    set("sellerCredit", 0);
+    set("excessDeposit", A11);
+    set("builderSeller", C.builder);  set("builderBuyer", C.builder);
+    set("surveySeller", C.survey);    set("surveyBuyer", C.survey);
+    set("abstract", C.abstract);
+    set("erecording", C.erecording);
+    set("settlement", C.settlement);
+    set("titleIns", ti);
+    set("recording", C.recording);
+    set("deedStamps", ds);
+    set("hoaClosing", hoaCM);
+    set("capital", C.capital);
+    set("hoaFollowing", hoa);
+
+    set("subA", A28); set("subB", B28); set("subD", D28); set("subE", E28);
+    set("dueFromBuyer", E29);
+    set("dueToSeller", A30);
+    set("totA", A28); set("totB", B28); set("totD", D28); set("totE", E28 + E29);
+
+    document.getElementById("cashToClose").textContent = usd(E29);
+  }
+
+  function resetForm(){
+    document.getElementById("salePrice").value = FALLBACK.salePrice;
+    document.getElementById("deposit").value = FALLBACK.deposit;
+    document.getElementById("credit").value = FALLBACK.credit;
+    document.getElementById("closingDate").value = FALLBACK.closingDate;
+    document.getElementById("hoa").value = FALLBACK.hoa;
+    document.getElementById("brokerRebate").value = FALLBACK.brokerRebate;
+    document.getElementById("taxBill").value = FALLBACK.taxBill;
+    recalc();
+  }
+
+  ["salePrice","deposit","credit","closingDate","hoa","brokerRebate","taxBill"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", recalc);
+  });
+  recalc();
+</script>
+</body>
+</html>
