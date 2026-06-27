@@ -127,13 +127,33 @@
 
   /* PRINT: only the worksheet, clean, color-accurate */
   @media print{
-    @page{size:letter portrait;margin:0.5in;}
-    body{background:#fff;padding:0;}
+    @page{size:letter portrait;margin:0.35in;}
+    body{background:#fff;padding:0;font-size:11px;}
     .no-print{display:none !important;}
     .wrap{max-width:none;margin:0;}
-    .sheet{box-shadow:none;border:1px solid #b9c2d4;border-radius:0;}
+    .sheet{box-shadow:none;border:1px solid #b9c2d4;border-radius:0;page-break-inside:avoid;}
     *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-    tbody td{padding:5px 12px;}
+
+    /* Compress header */
+    .sheet-title{padding:9px 20px 4px;}
+    .sheet-title h1{font-size:17px;}
+    .sheet-sub{padding:4px 20px 6px;font-size:10px;}
+    .summary div{padding:6px 22px;}
+    .summary .lbl{font-size:9.5px;margin-bottom:1px;}
+    .summary .val{font-size:13px;}
+
+    /* Compress table */
+    thead th{padding:5px 12px;font-size:9.5px;}
+    tbody td{padding:2.5px 12px;font-size:10.5px;}
+    tbody tr.section td{padding:3.5px 12px;font-size:9.5px;}
+    tbody tr.subtotal td,
+    tbody tr.totals td{padding:4px 12px;}
+
+    /* Compress cash-to-close + footer */
+    .ctc{padding:10px 22px;}
+    .ctc .ctc-lbl{font-size:11px;}
+    .ctc .ctc-val{font-size:21px;}
+    .foot{padding:7px 22px;font-size:9px;}
   }
 </style>
 </head>
