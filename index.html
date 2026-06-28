@@ -201,7 +201,7 @@
       <div class="field">
         <label for="brokerRebate">Broker Rebate</label>
         <input id="brokerRebate" type="number" inputmode="decimal" step="100" value="0">
-        <div class="note">Reference only — not included in totals.</div>
+        <div class="note">Credited to the buyer (Broker Rebate line).</div>
       </div>
       <div class="field">
         <label for="taxBill">Tax Bill Amount <span class="sub">(annual)</span></label>
@@ -257,6 +257,7 @@
         <tr class="indent"><td></td><td></td><td class="desc">HOA Dues &ndash; Closing Month</td><td id="hoaClosing"></td><td></td></tr>
         <tr class="indent"><td></td><td></td><td class="desc">Capital Contribution</td><td id="capital"></td><td></td></tr>
         <tr class="indent"><td></td><td></td><td class="desc">HOA Dues &ndash; Following Month</td><td id="hoaFollowing"></td><td></td></tr>
+        <tr class="indent"><td></td><td></td><td class="desc">Broker Rebate</td><td></td><td id="brokerRebateCredit"></td></tr>
 
         <tr class="subtotal"><td id="subA"></td><td id="subB"></td><td class="desc">Subtotals</td><td id="subD"></td><td id="subE"></td></tr>
         <tr class="line-total"><td></td><td></td><td class="desc">Due from Buyer</td><td></td><td id="dueFromBuyer"></td></tr>
@@ -299,6 +300,7 @@
     var cr  = num("credit");
     var hoa = num("hoa");
     var taxBill = num("taxBill");
+    var br = num("brokerRebate");
     var dStr = document.getElementById("closingDate").value;
 
     // HOA closing-month proration (matches Excel: (annualHOA/12) * dayOfMonth / daysInMonth)
@@ -326,7 +328,7 @@
     var A11 = Math.min(cr, sumD17_27);                 // seller credit, capped
     var sumD13_27 = C.builder + C.survey + sumD17_27;
     var D28 = sumD13_27 + sp;                           // total buyer debit (SUM(D13:D27)-D10+B8, D10=0)
-    var E28 = dep + taxProration;                      // buyer credits (deposit + tax proration)
+    var E28 = dep + taxProration + br;                 // buyer credits (deposit + tax proration + broker rebate)
     var E29 = D28 - E28 - A11;                          // cash to close
     var B28 = sp + C.builder + C.survey;               // total seller credit
     var A28 = A11 + taxProration;                       // seller debits (capped credit + tax proration)
@@ -354,6 +356,7 @@
     set("countyTaxCredit", taxProration);
     set("capital", C.capital);
     set("hoaFollowing", hoa);
+    set("brokerRebateCredit", br);
 
     set("subA", A28); set("subB", B28); set("subD", D28); set("subE", E28);
     set("dueFromBuyer", E29);
